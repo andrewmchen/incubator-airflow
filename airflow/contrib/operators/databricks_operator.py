@@ -1,3 +1,18 @@
+# -*- coding: utf-8 -*-
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 import logging
 import time
 
@@ -6,7 +21,7 @@ from airflow.contrib.hooks.databricks_hook import DatabricksHook
 from airflow.models import BaseOperator
 
 POLL_SLEEP_PERIOD_SECONDS = 5
-HR = ("-" * 80)
+LINE_BREAK = ("-" * 80)
 
 class DatabricksSubmitRunOperator(BaseOperator):
     """
@@ -30,7 +45,7 @@ class DatabricksSubmitRunOperator(BaseOperator):
         self.new_cluster = new_cluster
         self.existing_cluster_id = existing_cluster_id
         self.libraries = libraries
-        self.run_name = task_id if run_name is None else run_name
+        self.run_name = kwargs['task_id'] if run_name is None else run_name
         self.timeout_seconds = timeout_seconds
         self.extra_api_parameters = extra_api_parameters
         self.databricks_conn_id = databricks_conn_id
@@ -65,10 +80,10 @@ class DatabricksSubmitRunOperator(BaseOperator):
                                  self.timeout_seconds,
                                  **self.extra_api_parameters)
         run_page_url = hook.get_run_page_url(run_id)
-        logging.info(HR)
+        logging.info(LINE_BREAK)
         logging.info('Run submitted with run_id: {}'.format(run_id))
         self._log_run_page_url(run_page_url)
-        logging.info(HR)
+        logging.info(LINE_BREAK)
         while True:
             run_state = hook.get_run_state(run_id)
             if run_state.is_terminal:
