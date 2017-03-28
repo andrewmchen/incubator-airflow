@@ -32,6 +32,7 @@ NEW_CLUSTER = {
 }
 RUN_ID = 1
 HOST = 'databricks.com'
+INVALID_HOST = 'https://databricks.com'
 LOGIN = 'login'
 PASSWORD = 'password'
 USER_AGENT_HEADER = {'user-agent': 'airflow-{v}'.format(v=__version__)}
@@ -65,12 +66,25 @@ def get_run_endpoint(host):
 
 class DatabricksHookTest(unittest.TestCase):
 
-    def setUp(self):
-        db.merge_conn(Connection(conn_id=DEFAULT_CONN_ID,
-                                 host=HOST,
-                                 login=LOGIN,
-                                 password=PASSWORD))
+    @db.provide_session
+    def setUp(self, session=None):
+        conn = session.query(Connection) \
+                      .filter(Connection.conn_id == DEFAULT_CONN_ID) \
+                      .first()
+        conn.host = HOST
+        conn.login = LOGIN
+        conn.password = PASSWORD
+        session.commit()
+
         self.hook = DatabricksHook()
+
+    def test_parse_host_with_proper_host(self):
+        host = self.hook._parse_host(HOST)
+        self.assertEquals(host, HOST)
+
+    def test_parse_host_with_invalid_host(self):
+        host = self.hook._parse_host(INVALID_HOST)
+        self.assertEquals(host, HOST)
 
     @mock.patch('airflow.contrib.hooks.databricks_hook.requests')
     def test_submit_run(self, mock_requests):

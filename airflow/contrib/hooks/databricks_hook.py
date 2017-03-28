@@ -20,6 +20,12 @@ from airflow import __version__
 from airflow.exceptions import AirflowException
 from airflow.hooks.base_hook import BaseHook
 
+try:
+    from urllib import parse as urlparse
+except ImportError:
+    import urlparse
+
+
 SUBMIT_RUN_ENDPOINT = ('POST', 'api/2.0/jobs/runs/submit')
 GET_RUN_ENDPOINT = ('GET', 'api/2.0/jobs/runs/get')
 USER_AGENT_HEADER = {'user-agent': 'airflow-{v}'.format(v=__version__)}
@@ -38,10 +44,24 @@ class DatabricksHook(BaseHook):
         self.timeout_seconds = timeout_seconds
         self.retry_limit = retry_limit
 
+    def _parse_host(self, host):
+        """
+        The purpose of this function is to tolerate improper connections
+        where users supply ``https://databricks.com`` instead of the
+        correct ``databricks.com`` for the host.
+        """
+        urlparse_host = urlparse.urlparse(host).hostname
+        if urlparse_host:
+            # In this case, host = https://databricks.com
+            return urlparse_host
+        else:
+            # In this case, host = databricks.com
+            return host
+
     def _do_api_call(self, endpoint_info, api_parameters):
         method, endpoint = endpoint_info
         url = 'https://{host}/{endpoint}'.format(
-                host=self.databricks_conn.host,
+                host=self._parse_host(self.databricks_conn.host),
                 endpoint=endpoint)
         auth = (self.databricks_conn.login, self.databricks_conn.password)
         if method == 'GET':
@@ -67,10 +87,10 @@ class DatabricksHook(BaseHook):
                 else:
                     return response.json()
             except Exception as e:
-                logging.error('Attempt {0} API Request to Databricks failed ' +
-                              'with reason: {1}'.format(attempt_num, e))
-        raise AirflowException('API requests to Databricks failed {} times. ' +
-                               'Giving up.'.format(self.retry_limit))
+                logging.error(('Attempt {0} API Request to Databricks failed ' +
+                              'with reason: {1}').format(attempt_num, e))
+        raise AirflowException(('API requests to Databricks failed {} times. ' +
+                               'Giving up.').format(self.retry_limit))
 
     def submit_run(self,
                    spark_jar_task=None,

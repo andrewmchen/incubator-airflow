@@ -241,6 +241,10 @@ def initdb():
                     ]
                 }
             '''))
+    merge_conn(
+        models.Connection(
+            conn_id='databricks_default', conn_type='databricks',
+            host='localhost'))
 
     # Known event types
     KET = models.KnownEventType

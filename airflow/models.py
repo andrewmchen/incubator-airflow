@@ -542,6 +542,7 @@ class Connection(Base):
         ('mesos_framework-id', 'Mesos Framework ID'),
         ('jira', 'JIRA',),
         ('redis', 'Redis',),
+        ('databricks', 'Databricks',),
     ]
 
     def __init__(
