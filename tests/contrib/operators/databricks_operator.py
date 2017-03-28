@@ -181,7 +181,7 @@ class DatabricksSubmitRunOperatorTest(unittest.TestCase):
     @mock.patch('airflow.contrib.operators.databricks_operator.DatabricksHook')
     def test_exec_success(self, db_mock_class):
         """
-        Test the execute function in case where run is successful.
+        Test the execute function in case where the run is successful.
         """
         run = {
           'new_cluster': NEW_CLUSTER,
@@ -208,7 +208,7 @@ class DatabricksSubmitRunOperatorTest(unittest.TestCase):
     @mock.patch('airflow.contrib.operators.databricks_operator.DatabricksHook')
     def test_exec_failure(self, db_mock_class):
         """
-        Test the execute function in case where run is failed.
+        Test the execute function in case where the run failed.
         """
         run = {
           'new_cluster': NEW_CLUSTER,
