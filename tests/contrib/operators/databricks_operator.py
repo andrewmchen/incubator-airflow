@@ -44,6 +44,7 @@ except ImportError:
     except ImportError:
         mock = None
 
+
 class DatabricksSubmitRunOperatorTest(unittest.TestCase):
 
     def _test_init(self,
@@ -138,7 +139,7 @@ class DatabricksSubmitRunOperatorTest(unittest.TestCase):
                                          0,
                                          {},
                                          'databricks_default',
-                                         task_id = TASK_ID)
+                                         task_id=TASK_ID)
         self._test_init(op,
                         expected_spark_jar_task=None,
                         expected_notebook_task=NOTEBOOK_TASK,
@@ -161,7 +162,7 @@ class DatabricksSubmitRunOperatorTest(unittest.TestCase):
           'spark_jar_task': SPARK_JAR_TASK
         }
         with self.assertRaises(AirflowException):
-            op = DatabricksSubmitRunOperator(task_id=TASK_ID, **run)
+            DatabricksSubmitRunOperator(task_id=TASK_ID, **run)
 
     def test_init_with_invalid_oneof_cluster(self):
         """
@@ -175,7 +176,7 @@ class DatabricksSubmitRunOperatorTest(unittest.TestCase):
           'existing_cluster_id': EXISTING_CLUSTER_ID
         }
         with self.assertRaises(AirflowException):
-            op = DatabricksSubmitRunOperator(task_id=TASK_ID, **run)
+            DatabricksSubmitRunOperator(task_id=TASK_ID, **run)
 
     @mock.patch('airflow.contrib.operators.databricks_operator.DatabricksHook')
     def test_exec_success(self, db_mock_class):
@@ -187,7 +188,6 @@ class DatabricksSubmitRunOperatorTest(unittest.TestCase):
           'notebook_task': NOTEBOOK_TASK,
         }
         op = DatabricksSubmitRunOperator(task_id=TASK_ID, **run)
-        attrs = {'method.return_value': 3, 'other.side_effect': KeyError}
         db_mock = db_mock_class.return_value
         db_mock.submit_run.return_value = 1
         db_mock.get_run_state.return_value = RunState('TERMINATED', 'SUCCESS', '')
@@ -195,13 +195,13 @@ class DatabricksSubmitRunOperatorTest(unittest.TestCase):
         op.execute(None)
 
         db_mock_class.assert_called_once_with(DEFAULT_CONN_ID)
-        db_mock.submit_run.assert_called_once_with(None,          # spark_jar_task
-                                                   NOTEBOOK_TASK, # notebook_task
-                                                   NEW_CLUSTER,   # new_cluster
-                                                   None,          # existing_cluster_id
-                                                   [],            # libraries
-                                                   TASK_ID,       # run_name
-                                                   0)             # timeout_seconds
+        db_mock.submit_run.assert_called_once_with(None,           # spark_jar_task
+                                                   NOTEBOOK_TASK,  # notebook_task
+                                                   NEW_CLUSTER,    # new_cluster
+                                                   None,           # existing_cluster_id
+                                                   [],             # libraries
+                                                   TASK_ID,        # run_name
+                                                   0)              # timeout_seconds
         db_mock.get_run_page_url.assert_called_once_with(RUN_ID)
         db_mock.get_run_state.assert_called_once_with(RUN_ID)
 
@@ -214,8 +214,7 @@ class DatabricksSubmitRunOperatorTest(unittest.TestCase):
           'new_cluster': NEW_CLUSTER,
           'notebook_task': NOTEBOOK_TASK,
         }
-        op = DatabricksSubmitRunOperator(task_id = TASK_ID, **run)
-        attrs = {'method.return_value': 3, 'other.side_effect': KeyError}
+        op = DatabricksSubmitRunOperator(task_id=TASK_ID, **run)
         db_mock = db_mock_class.return_value
         db_mock.submit_run.return_value = 1
         db_mock.get_run_state.return_value = RunState('TERMINATED', 'SUCCESS', '')
@@ -223,13 +222,13 @@ class DatabricksSubmitRunOperatorTest(unittest.TestCase):
         op.execute(None)
 
         db_mock_class.assert_called_once_with(DEFAULT_CONN_ID)
-        db_mock.submit_run.assert_called_once_with(None,          # spark_jar_task
-                                                   NOTEBOOK_TASK, # notebook_task
-                                                   NEW_CLUSTER,   # new_cluster
-                                                   None,          # existing_cluster_id
-                                                   [],            # libraries
-                                                   TASK_ID,       # run_name
-                                                   0)             # timeout_seconds
+        db_mock.submit_run.assert_called_once_with(None,           # spark_jar_task
+                                                   NOTEBOOK_TASK,  # notebook_task
+                                                   NEW_CLUSTER,    # new_cluster
+                                                   None,           # existing_cluster_id
+                                                   [],             # libraries
+                                                   TASK_ID,        # run_name
+                                                   0)              # timeout_seconds
         db_mock.get_run_page_url.assert_called_once_with(RUN_ID)
         db_mock.get_run_state.assert_called_once_with(RUN_ID)
 
@@ -244,7 +243,6 @@ class DatabricksSubmitRunOperatorTest(unittest.TestCase):
           'extra_api_parameters': {'test_param': '1'},
         }
         op = DatabricksSubmitRunOperator(task_id=TASK_ID, **run)
-        attrs = {'method.return_value': 3, 'other.side_effect': KeyError}
         db_mock = db_mock_class.return_value
         db_mock.submit_run.return_value = 1
         db_mock.get_run_state.return_value = RunState('TERMINATED', 'FAILED', '')
@@ -253,13 +251,13 @@ class DatabricksSubmitRunOperatorTest(unittest.TestCase):
             op.execute(None)
 
         db_mock_class.assert_called_once_with(DEFAULT_CONN_ID)
-        db_mock.submit_run.assert_called_once_with(None,          # spark_jar_task
-                                                   NOTEBOOK_TASK, # notebook_task
-                                                   NEW_CLUSTER,   # new_cluster
-                                                   None,          # existing_cluster_id
-                                                   [],            # libraries
-                                                   TASK_ID,       # run_name
-                                                   0,             # timeout_seconds
-                                                   test_param = '1')
+        db_mock.submit_run.assert_called_once_with(None,           # spark_jar_task
+                                                   NOTEBOOK_TASK,  # notebook_task
+                                                   NEW_CLUSTER,    # new_cluster
+                                                   None,           # existing_cluster_id
+                                                   [],             # libraries
+                                                   TASK_ID,        # run_name
+                                                   0,              # timeout_seconds
+                                                   test_param='1')
         db_mock.get_run_page_url.assert_called_once_with(RUN_ID)
         db_mock.get_run_state.assert_called_once_with(RUN_ID)

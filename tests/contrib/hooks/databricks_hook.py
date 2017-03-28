@@ -34,7 +34,7 @@ RUN_ID = 1
 HOST = 'databricks.com'
 LOGIN = 'login'
 PASSWORD = 'password'
-USER_AGENT_HEADER = {'user-agent': 'airflow-{v}'.format(v = __version__)}
+USER_AGENT_HEADER = {'user-agent': 'airflow-{v}'.format(v=__version__)}
 RUN_PAGE_URL = 'https://databricks.com/#jobs/1/runs/1'
 LIFE_CYCLE_STATE = 'PENDING'
 STATE_MESSAGE = 'Waiting for cluster'
@@ -54,11 +54,14 @@ except ImportError:
     except ImportError:
         mock = None
 
+
 def submit_run_endpoint(host):
     return 'https://{}/api/2.0/jobs/runs/submit'.format(host)
 
+
 def get_run_endpoint(host):
     return 'https://{}/api/2.0/jobs/runs/get'.format(host)
+
 
 class DatabricksHookTest(unittest.TestCase):
 
@@ -78,16 +81,16 @@ class DatabricksHookTest(unittest.TestCase):
 
         self.assertEquals(run_id, '1')
         mock_requests.post.assert_called_once_with(submit_run_endpoint(HOST),
-                                                  json={
+                                                   json={
                                                       'notebook_task': NOTEBOOK_TASK,
                                                       'new_cluster': NEW_CLUSTER,
                                                       'libraries': [],
                                                       'timeout_seconds': 0
-                                                  },
-                                                  auth=(LOGIN, PASSWORD),
-                                                  headers=USER_AGENT_HEADER,
-                                                  timeout=self.hook.timeout_seconds,
-                                                  verify=False)
+                                                   },
+                                                   auth=(LOGIN, PASSWORD),
+                                                   headers=USER_AGENT_HEADER,
+                                                   timeout=self.hook.timeout_seconds,
+                                                   verify=False)
 
     @mock.patch('airflow.contrib.hooks.databricks_hook.requests')
     def test_get_run_page_url(self, mock_requests):
@@ -116,6 +119,7 @@ class DatabricksHookTest(unittest.TestCase):
                                                   headers=USER_AGENT_HEADER,
                                                   timeout=self.hook.timeout_seconds,
                                                   verify=False)
+
 
 class RunStateTest(unittest.TestCase):
     def test_from_get_run_response(self):

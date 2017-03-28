@@ -22,13 +22,17 @@ from airflow.hooks.base_hook import BaseHook
 
 SUBMIT_RUN_ENDPOINT = ('POST', 'api/2.0/jobs/runs/submit')
 GET_RUN_ENDPOINT = ('GET', 'api/2.0/jobs/runs/get')
-USER_AGENT_HEADER = {'user-agent': 'airflow-{v}'.format(v = __version__)}
+USER_AGENT_HEADER = {'user-agent': 'airflow-{v}'.format(v=__version__)}
+
 
 class DatabricksHook(BaseHook):
     """
     Interact with Databricks.
     """
-    def __init__(self, databricks_conn_id='databricks_default', timeout_seconds=60, retry_limit=3):
+    def __init__(self,
+                 databricks_conn_id='databricks_default',
+                 timeout_seconds=60,
+                 retry_limit=3):
         self.databricks_conn_id = databricks_conn_id
         self.databricks_conn = self.get_connection(databricks_conn_id)
         self.timeout_seconds = timeout_seconds
@@ -36,8 +40,9 @@ class DatabricksHook(BaseHook):
 
     def _do_api_call(self, endpoint_info, api_parameters):
         method, endpoint = endpoint_info
-        url = 'https://{host}/{endpoint}'.format(host=self.databricks_conn.host,
-                                                 endpoint=endpoint)
+        url = 'https://{host}/{endpoint}'.format(
+                host=self.databricks_conn.host,
+                endpoint=endpoint)
         auth = (self.databricks_conn.login, self.databricks_conn.password)
         if method == 'GET':
             request_func = requests.get
@@ -102,6 +107,7 @@ class DatabricksHook(BaseHook):
         response = self._do_api_call(GET_RUN_ENDPOINT, api_params)
         return RunState.from_get_run_response(response)
 
+
 class RunState:
     def __init__(self, life_cycle_state, result_state, state_message):
         self.life_cycle_state = life_cycle_state
@@ -122,6 +128,7 @@ class RunState:
         return self.life_cycle_state == 'TERMINATED' or \
                self.life_cycle_state == 'SKIPPED' or \
                self.life_cycle_state == 'INTERNAL_ERROR'
+
     @property
     def is_successful(self):
         return self.result_state is not None and self.result_state == 'SUCCESS'

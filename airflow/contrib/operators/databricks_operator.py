@@ -23,10 +23,14 @@ from airflow.models import BaseOperator
 POLL_SLEEP_PERIOD_SECONDS = 5
 LINE_BREAK = ("-" * 80)
 
+
 class DatabricksSubmitRunOperator(BaseOperator):
     """
-    Submits an ephemeral run to Databricks and waits
-    for it to terminate successfully.
+    Submits an ephemeral run to Databricks and waits for it to complete
+    successfully.
+
+    For more information about Databricks ephemeral runs look at
+    https://docs.databricks.com/api/latest/jobs.html#runs-submit
     """
     def __init__(self,
                  spark_jar_task=None,
@@ -39,6 +43,42 @@ class DatabricksSubmitRunOperator(BaseOperator):
                  extra_api_parameters={},
                  databricks_conn_id='databricks_default',
                  **kwargs):
+        """
+        Create a new `DatabricksSubmitRunOperator`. Note that the named
+        parameters to this operator match the parameters exposed by
+        `api/2.0/runs/submit`.
+
+        As a result, one way to instantiate a `DatabricksSubmitRunOperator`
+        is to pass the same JSON object used to call `api/2.0/runs/submit`
+        into the `DatabricksSubmitRunOperator`. For example:
+
+        ```
+        params = {
+          "new_cluster": {
+            "spark_version": "2.0.x-scala2.10",
+            "node_type_id": "r3.xlarge",
+            "aws_attributes": {
+              "availability": "ON_DEMAND"
+            },
+            "num_workers": 2
+          },
+          "libraries": [
+            {
+              "jar": "dbfs:/test.jar"
+            },
+            {
+              "maven": {
+                "coordinates": "org.jsoup:jsoup:1.7.2"
+              }
+            }
+          ],
+          "spark_jar_task": {
+            "main_class_name": "com.databricks.ComputeModels"
+          }
+        }
+        DatabricksSubmitRunOperator(task_id='run-1', **params)
+        ```
+        """
         super(DatabricksSubmitRunOperator, self).__init__(**kwargs)
         self.spark_jar_task = spark_jar_task
         self.notebook_task = notebook_task
@@ -88,16 +128,19 @@ class DatabricksSubmitRunOperator(BaseOperator):
             run_state = hook.get_run_state(run_id)
             if run_state.is_terminal:
                 if run_state.is_successful:
-                    logging.info('{} completed successfully.'.format(self.task_id))
+                    logging.info('{} completed successfully.'.format(
+                        self.task_id))
                     self._log_run_page_url(run_page_url)
                     return
                 else:
-                    error_message = '{t} failed with terminal state: {s}'.format(t=self.task_id,
-                                                                                 s=run_state)
+                    error_message = '{t} failed with terminal state: {s}'.format(
+                                    t=self.task_id,
+                                    s=run_state)
                     raise AirflowException(error_message)
             else:
                 logging.info('{t} in run state: {s}'.format(t=self.task_id,
                                                             s=run_state))
                 self._log_run_page_url(run_page_url)
-                logging.info('Sleeping for {} seconds.'.format(POLL_SLEEP_PERIOD_SECONDS))
+                logging.info('Sleeping for {} seconds.'.format(
+                    POLL_SLEEP_PERIOD_SECONDS))
                 time.sleep(POLL_SLEEP_PERIOD_SECONDS)
