@@ -83,12 +83,12 @@ class DatabricksHook(BaseHook):
                                         headers=USER_AGENT_HEADER,
                                         timeout=self.timeout_seconds,
                                         verify=False)
-                if response.status_code == 404:
+                if response.status_code == 200:
+                    return response.json()
+                else:
                     # In this case, the user probably made a mistake.
                     # Don't retry.
                     raise AirflowException(response.content)
-                else:
-                    return response.json()
             except (ConnectionError, Timeout) as e:
                 logging.error(('Attempt {0} API Request to Databricks failed ' +
                               'with reason: {1}').format(attempt_num, e))
