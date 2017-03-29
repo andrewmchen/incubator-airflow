@@ -80,8 +80,8 @@ class DatabricksHookTest(unittest.TestCase):
     @db.provide_session
     def setUp(self, session=None):
         conn = session.query(Connection) \
-                      .filter(Connection.conn_id == DEFAULT_CONN_ID) \
-                      .first()
+            .filter(Connection.conn_id == DEFAULT_CONN_ID) \
+            .first()
         conn.host = HOST
         conn.login = LOGIN
         conn.password = PASSWORD
@@ -114,21 +114,23 @@ class DatabricksHookTest(unittest.TestCase):
     def test_submit_run(self, mock_requests):
         mock_requests.post.return_value.json.return_value = {'run_id': '1'}
 
-        run_id = self.hook.submit_run(notebook_task=NOTEBOOK_TASK,
-                                      new_cluster=NEW_CLUSTER)
+        run_id = self.hook.submit_run(
+            notebook_task=NOTEBOOK_TASK,
+            new_cluster=NEW_CLUSTER)
 
         self.assertEquals(run_id, '1')
-        mock_requests.post.assert_called_once_with(submit_run_endpoint(HOST),
-                                                   json={
-                                                      'notebook_task': NOTEBOOK_TASK,
-                                                      'new_cluster': NEW_CLUSTER,
-                                                      'libraries': [],
-                                                      'timeout_seconds': 0
-                                                   },
-                                                   auth=(LOGIN, PASSWORD),
-                                                   headers=USER_AGENT_HEADER,
-                                                   timeout=self.hook.timeout_seconds,
-                                                   verify=False)
+        mock_requests.post.assert_called_once_with(
+            submit_run_endpoint(HOST),
+            json={
+                'notebook_task': NOTEBOOK_TASK,
+                'new_cluster': NEW_CLUSTER,
+                'libraries': [],
+                'timeout_seconds': 0
+            },
+            auth=(LOGIN, PASSWORD),
+            headers=USER_AGENT_HEADER,
+            timeout=self.hook.timeout_seconds,
+            verify=False)
 
     @mock.patch('airflow.contrib.hooks.databricks_hook.requests')
     def test_get_run_page_url(self, mock_requests):
@@ -137,12 +139,13 @@ class DatabricksHookTest(unittest.TestCase):
         run_page_url = self.hook.get_run_page_url(RUN_ID)
 
         self.assertEquals(run_page_url, RUN_PAGE_URL)
-        mock_requests.get.assert_called_once_with(get_run_endpoint(HOST),
-                                                  json={'run_id': RUN_ID},
-                                                  auth=(LOGIN, PASSWORD),
-                                                  headers=USER_AGENT_HEADER,
-                                                  timeout=self.hook.timeout_seconds,
-                                                  verify=False)
+        mock_requests.get.assert_called_once_with(
+            get_run_endpoint(HOST),
+            json={'run_id': RUN_ID},
+            auth=(LOGIN, PASSWORD),
+            headers=USER_AGENT_HEADER,
+            timeout=self.hook.timeout_seconds,
+            verify=False)
 
     @mock.patch('airflow.contrib.hooks.databricks_hook.requests')
     def test_get_run_state(self, mock_requests):
@@ -151,12 +154,13 @@ class DatabricksHookTest(unittest.TestCase):
         run_state = self.hook.get_run_state(RUN_ID)
 
         self.assertEquals(run_state, RunState.from_get_run_response(GET_RUN_RESPONSE))
-        mock_requests.get.assert_called_once_with(get_run_endpoint(HOST),
-                                                  json={'run_id': RUN_ID},
-                                                  auth=(LOGIN, PASSWORD),
-                                                  headers=USER_AGENT_HEADER,
-                                                  timeout=self.hook.timeout_seconds,
-                                                  verify=False)
+        mock_requests.get.assert_called_once_with(
+            get_run_endpoint(HOST),
+            json={'run_id': RUN_ID},
+            auth=(LOGIN, PASSWORD),
+            headers=USER_AGENT_HEADER,
+            timeout=self.hook.timeout_seconds,
+            verify=False)
 
 
 class RunStateTest(unittest.TestCase):

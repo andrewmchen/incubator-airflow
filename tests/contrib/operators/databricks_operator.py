@@ -79,15 +79,16 @@ class DatabricksSubmitRunOperatorTest(unittest.TestCase):
           'notebook_task': NOTEBOOK_TASK
         }
         op = DatabricksSubmitRunOperator(task_id=TASK_ID, **run)
-        self._test_init(op,
-                        expected_spark_jar_task=None,
-                        expected_notebook_task=NOTEBOOK_TASK,
-                        expected_existing_cluster_id=None,
-                        expected_libraries=[],
-                        expected_run_name=TASK_ID,
-                        expected_timeout_seconds=0,
-                        expected_extra_api_parameters={},
-                        expected_databricks_conn_id=DEFAULT_CONN_ID)
+        self._test_init(
+            op,
+            expected_spark_jar_task=None,
+            expected_notebook_task=NOTEBOOK_TASK,
+            expected_existing_cluster_id=None,
+            expected_libraries=[],
+            expected_run_name=TASK_ID,
+            expected_timeout_seconds=0,
+            expected_extra_api_parameters={},
+            expected_databricks_conn_id=DEFAULT_CONN_ID)
 
     def test_init_with_unpacked_json_and_run_name(self):
         """
@@ -99,57 +100,62 @@ class DatabricksSubmitRunOperatorTest(unittest.TestCase):
           'run_name': RUN_NAME
         }
         op = DatabricksSubmitRunOperator(task_id=TASK_ID, **run)
-        self._test_init(op,
-                        expected_spark_jar_task=None,
-                        expected_notebook_task=NOTEBOOK_TASK,
-                        expected_existing_cluster_id=None,
-                        expected_libraries=[],
-                        expected_run_name=RUN_NAME,
-                        expected_timeout_seconds=0,
-                        expected_extra_api_parameters={},
-                        expected_databricks_conn_id=DEFAULT_CONN_ID)
+        self._test_init(
+            op,
+            expected_spark_jar_task=None,
+            expected_notebook_task=NOTEBOOK_TASK,
+            expected_existing_cluster_id=None,
+            expected_libraries=[],
+            expected_run_name=RUN_NAME,
+            expected_timeout_seconds=0,
+            expected_extra_api_parameters={},
+            expected_databricks_conn_id=DEFAULT_CONN_ID)
 
     def test_init_with_named_parameters(self):
         """
         Test the initializer which uses the named parameters.
         """
-        op = DatabricksSubmitRunOperator(task_id=TASK_ID,
-                                         new_cluster=NEW_CLUSTER,
-                                         notebook_task=NOTEBOOK_TASK)
-        self._test_init(op,
-                        expected_spark_jar_task=None,
-                        expected_notebook_task=NOTEBOOK_TASK,
-                        expected_existing_cluster_id=None,
-                        expected_libraries=[],
-                        expected_run_name=TASK_ID,
-                        expected_timeout_seconds=0,
-                        expected_extra_api_parameters={},
-                        expected_databricks_conn_id=DEFAULT_CONN_ID)
+        op = DatabricksSubmitRunOperator(
+            task_id=TASK_ID,
+            new_cluster=NEW_CLUSTER,
+            notebook_task=NOTEBOOK_TASK)
+        self._test_init(
+            op,
+            expected_spark_jar_task=None,
+            expected_notebook_task=NOTEBOOK_TASK,
+            expected_existing_cluster_id=None,
+            expected_libraries=[],
+            expected_run_name=TASK_ID,
+            expected_timeout_seconds=0,
+            expected_extra_api_parameters={},
+            expected_databricks_conn_id=DEFAULT_CONN_ID)
 
     def test_init_with_positional_parameters(self):
         """
         Test the initializer which uses positional parameters. Users should not
         use it this way but we cannot enforce this.
         """
-        op = DatabricksSubmitRunOperator(None,
-                                         NOTEBOOK_TASK,
-                                         NEW_CLUSTER,
-                                         None,
-                                         [],
-                                         None,
-                                         0,
-                                         {},
-                                         'databricks_default',
-                                         task_id=TASK_ID)
-        self._test_init(op,
-                        expected_spark_jar_task=None,
-                        expected_notebook_task=NOTEBOOK_TASK,
-                        expected_existing_cluster_id=None,
-                        expected_libraries=[],
-                        expected_run_name=TASK_ID,
-                        expected_timeout_seconds=0,
-                        expected_extra_api_parameters={},
-                        expected_databricks_conn_id=DEFAULT_CONN_ID)
+        op = DatabricksSubmitRunOperator(
+            None,
+            NOTEBOOK_TASK,
+            NEW_CLUSTER,
+            None,
+            [],
+            None,
+            0,
+            {},
+            'databricks_default',
+            task_id=TASK_ID)
+        self._test_init(
+            op,
+            expected_spark_jar_task=None,
+            expected_notebook_task=NOTEBOOK_TASK,
+            expected_existing_cluster_id=None,
+            expected_libraries=[],
+            expected_run_name=TASK_ID,
+            expected_timeout_seconds=0,
+            expected_extra_api_parameters={},
+            expected_databricks_conn_id=DEFAULT_CONN_ID)
 
     def test_init_with_invalid_oneof_task(self):
         """
@@ -196,13 +202,14 @@ class DatabricksSubmitRunOperatorTest(unittest.TestCase):
         op.execute(None)
 
         db_mock_class.assert_called_once_with(DEFAULT_CONN_ID)
-        db_mock.submit_run.assert_called_once_with(None,           # spark_jar_task
-                                                   NOTEBOOK_TASK,  # notebook_task
-                                                   NEW_CLUSTER,    # new_cluster
-                                                   None,           # existing_cluster_id
-                                                   [],             # libraries
-                                                   TASK_ID,        # run_name
-                                                   0)              # timeout_seconds
+        db_mock.submit_run.assert_called_once_with(
+            None,           # spark_jar_task
+            NOTEBOOK_TASK,  # notebook_task
+            NEW_CLUSTER,    # new_cluster
+            None,           # existing_cluster_id
+            [],             # libraries
+            TASK_ID,        # run_name
+            0)              # timeout_seconds
         db_mock.get_run_page_url.assert_called_once_with(RUN_ID)
         db_mock.get_run_state.assert_called_once_with(RUN_ID)
 
@@ -223,13 +230,14 @@ class DatabricksSubmitRunOperatorTest(unittest.TestCase):
         op.execute(None)
 
         db_mock_class.assert_called_once_with(DEFAULT_CONN_ID)
-        db_mock.submit_run.assert_called_once_with(None,           # spark_jar_task
-                                                   NOTEBOOK_TASK,  # notebook_task
-                                                   NEW_CLUSTER,    # new_cluster
-                                                   None,           # existing_cluster_id
-                                                   [],             # libraries
-                                                   TASK_ID,        # run_name
-                                                   0)              # timeout_seconds
+        db_mock.submit_run.assert_called_once_with(
+            None,           # spark_jar_task
+            NOTEBOOK_TASK,  # notebook_task
+            NEW_CLUSTER,    # new_cluster
+            None,           # existing_cluster_id
+            [],             # libraries
+            TASK_ID,        # run_name
+            0)              # timeout_seconds
         db_mock.get_run_page_url.assert_called_once_with(RUN_ID)
         db_mock.get_run_state.assert_called_once_with(RUN_ID)
 
@@ -252,13 +260,14 @@ class DatabricksSubmitRunOperatorTest(unittest.TestCase):
             op.execute(None)
 
         db_mock_class.assert_called_once_with(DEFAULT_CONN_ID)
-        db_mock.submit_run.assert_called_once_with(None,           # spark_jar_task
-                                                   NOTEBOOK_TASK,  # notebook_task
-                                                   NEW_CLUSTER,    # new_cluster
-                                                   None,           # existing_cluster_id
-                                                   [],             # libraries
-                                                   TASK_ID,        # run_name
-                                                   0,              # timeout_seconds
-                                                   test_param='1')
+        db_mock.submit_run.assert_called_once_with(
+            None,           # spark_jar_task
+            NOTEBOOK_TASK,  # notebook_task
+            NEW_CLUSTER,    # new_cluster
+            None,           # existing_cluster_id
+            [],             # libraries
+            TASK_ID,        # run_name
+            0,              # timeout_seconds
+            test_param='1')
         db_mock.get_run_page_url.assert_called_once_with(RUN_ID)
         db_mock.get_run_state.assert_called_once_with(RUN_ID)

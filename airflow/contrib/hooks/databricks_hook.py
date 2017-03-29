@@ -64,25 +64,25 @@ class DatabricksHook(BaseHook):
     def _do_api_call(self, endpoint_info, api_parameters):
         method, endpoint = endpoint_info
         url = 'https://{host}/{endpoint}'.format(
-                host=self._parse_host(self.databricks_conn.host),
-                endpoint=endpoint)
+            host=self._parse_host(self.databricks_conn.host),
+            endpoint=endpoint)
         auth = (self.databricks_conn.login, self.databricks_conn.password)
         if method == 'GET':
             request_func = requests.get
         elif method == 'POST':
             request_func = requests.post
         else:
-            raise AirflowException('Unexpected HTTP Method')
+            raise AirflowException('Unexpected HTTP Method: ' + method)
 
-        for _ in range(self.retry_limit):
-            attempt_num = _ + 1
+        for attempt_num in range(1, self.retry_limit+1):
             try:
-                response = request_func(url,
-                                        json=api_parameters,
-                                        auth=auth,
-                                        headers=USER_AGENT_HEADER,
-                                        timeout=self.timeout_seconds,
-                                        verify=False)
+                response = request_func(
+                    url,
+                    json=api_parameters,
+                    auth=auth,
+                    headers=USER_AGENT_HEADER,
+                    timeout=self.timeout_seconds,
+                    verify=False)
                 if response.status_code == 200:
                     return response.json()
                 else:

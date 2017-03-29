@@ -115,14 +115,15 @@ class DatabricksSubmitRunOperator(BaseOperator):
 
     def execute(self, context):
         hook = self.get_hook()
-        run_id = hook.submit_run(self.spark_jar_task,
-                                 self.notebook_task,
-                                 self.new_cluster,
-                                 self.existing_cluster_id,
-                                 self.libraries,
-                                 self.run_name,
-                                 self.timeout_seconds,
-                                 **self.extra_api_parameters)
+        run_id = hook.submit_run(
+            self.spark_jar_task,
+            self.notebook_task,
+            self.new_cluster,
+            self.existing_cluster_id,
+            self.libraries,
+            self.run_name,
+            self.timeout_seconds,
+            **self.extra_api_parameters)
         run_page_url = hook.get_run_page_url(run_id)
         logging.info(LINE_BREAK)
         logging.info('Run submitted with run_id: {}'.format(run_id))
