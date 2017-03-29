@@ -155,7 +155,7 @@ class RunState:
 
     @property
     def is_successful(self):
-        return self.result_state is not None and self.result_state == 'SUCCESS'
+        return self.result_state == 'SUCCESS'
 
     def __eq__(self, other):
         return self.life_cycle_state == other.life_cycle_state and \
