@@ -144,7 +144,7 @@ class DatabricksSubmitRunOperator(BaseOperator):
                 'Please select only one').format(param_a, param_b))
 
     def _log_run_page_url(self, url):
-        logging.info('View run status, Spark UI, and logs at {}.'.format(url))
+        logging.info('View run status, Spark UI, and logs at {}'.format(url))
 
     def get_hook(self):
         return DatabricksHook(self.databricks_conn_id)
