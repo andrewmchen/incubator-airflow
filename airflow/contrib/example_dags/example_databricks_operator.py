@@ -32,7 +32,7 @@ dag = DAG(
 
 NEW_CLUSTER_SPEC = {
     'spark_version': '2.0.x-scala2.10',
-    'node_type_id': 'r3.xlarge',
+    'node_type_id': 'memory-optimized',
     'aws_attributes': {
         'availability': 'ON_DEMAND'
     },
