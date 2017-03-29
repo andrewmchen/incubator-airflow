@@ -35,17 +35,18 @@ class DatabricksSubmitRunOperator(BaseOperator):
     ui_color = '#1CB1C2'
     ui_fgcolor = '#fff'
 
-    def __init__(self,
-                 spark_jar_task=None,
-                 notebook_task=None,
-                 new_cluster=None,
-                 existing_cluster_id=None,
-                 libraries=[],
-                 run_name=None,
-                 timeout_seconds=0,
-                 extra_api_parameters={},
-                 databricks_conn_id='databricks_default',
-                 **kwargs):
+    def __init__(
+            self,
+            spark_jar_task=None,
+            notebook_task=None,
+            new_cluster=None,
+            existing_cluster_id=None,
+            libraries=[],
+            run_name=None,
+            timeout_seconds=0,
+            extra_api_parameters={},
+            databricks_conn_id='databricks_default',
+            **kwargs):
         """
         Create a new `DatabricksSubmitRunOperator`. Note that the named
         parameters to this operator match the parameters exposed by
@@ -137,8 +138,8 @@ class DatabricksSubmitRunOperator(BaseOperator):
                     return
                 else:
                     error_message = '{t} failed with terminal state: {s}'.format(
-                                    t=self.task_id,
-                                    s=run_state)
+                            t=self.task_id,
+                            s=run_state)
                     raise AirflowException(error_message)
             else:
                 logging.info('{t} in run state: {s}'.format(t=self.task_id,

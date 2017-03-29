@@ -20,6 +20,8 @@ from airflow import __version__
 from airflow.exceptions import AirflowException
 from airflow.hooks.base_hook import BaseHook
 
+from requests.exceptions import ConnectionError, Timeout
+
 try:
     from urllib import parse as urlparse
 except ImportError:
@@ -35,10 +37,11 @@ class DatabricksHook(BaseHook):
     """
     Interact with Databricks.
     """
-    def __init__(self,
-                 databricks_conn_id='databricks_default',
-                 timeout_seconds=60,
-                 retry_limit=3):
+    def __init__(
+            self,
+            databricks_conn_id='databricks_default',
+            timeout_seconds=60,
+            retry_limit=3):
         self.databricks_conn_id = databricks_conn_id
         self.databricks_conn = self.get_connection(databricks_conn_id)
         self.timeout_seconds = timeout_seconds
@@ -86,21 +89,22 @@ class DatabricksHook(BaseHook):
                     raise AirflowException(response.content)
                 else:
                     return response.json()
-            except Exception as e:
+            except (ConnectionError, Timeout) as e:
                 logging.error(('Attempt {0} API Request to Databricks failed ' +
                               'with reason: {1}').format(attempt_num, e))
         raise AirflowException(('API requests to Databricks failed {} times. ' +
                                'Giving up.').format(self.retry_limit))
 
-    def submit_run(self,
-                   spark_jar_task=None,
-                   notebook_task=None,
-                   new_cluster=None,
-                   existing_cluster_id=None,
-                   libraries=[],
-                   run_name=None,
-                   timeout_seconds=0,
-                   **kwargs):
+    def submit_run(
+            self,
+            spark_jar_task=None,
+            notebook_task=None,
+            new_cluster=None,
+            existing_cluster_id=None,
+            libraries=[],
+            run_name=None,
+            timeout_seconds=0,
+            **kwargs):
         api_params = kwargs.copy()
         if spark_jar_task is not None:
             api_params['spark_jar_task'] = spark_jar_task

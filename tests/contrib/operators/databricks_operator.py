@@ -47,16 +47,17 @@ except ImportError:
 
 class DatabricksSubmitRunOperatorTest(unittest.TestCase):
 
-    def _test_init(self,
-                   op,
-                   expected_spark_jar_task,
-                   expected_notebook_task,
-                   expected_existing_cluster_id,
-                   expected_libraries,
-                   expected_run_name,
-                   expected_timeout_seconds,
-                   expected_extra_api_parameters,
-                   expected_databricks_conn_id):
+    def _test_init(
+            self,
+            op,
+            expected_spark_jar_task,
+            expected_notebook_task,
+            expected_existing_cluster_id,
+            expected_libraries,
+            expected_run_name,
+            expected_timeout_seconds,
+            expected_extra_api_parameters,
+            expected_databricks_conn_id):
         """
         Utility method to test behavior of initializer.
         """

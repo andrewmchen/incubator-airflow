@@ -16,9 +16,12 @@
 import unittest
 
 from airflow import __version__
-from airflow.contrib.hooks.databricks_hook import DatabricksHook, RunState
+from airflow.contrib.hooks.databricks_hook import DatabricksHook, RunState, SUBMIT_RUN_ENDPOINT
+from airflow.exceptions import AirflowException
 from airflow.models import Connection
 from airflow.utils import db
+
+from requests.exceptions import ConnectionError, Timeout
 
 TASK_ID = 'databricks-operator'
 DEFAULT_CONN_ID = 'databricks_default'
@@ -57,15 +60,23 @@ except ImportError:
 
 
 def submit_run_endpoint(host):
+    """
+    Utility function to generate the submit run endpoint given the host.
+    """
     return 'https://{}/api/2.0/jobs/runs/submit'.format(host)
 
 
 def get_run_endpoint(host):
+    """
+    Utility function to generate the get run endpoint given the host.
+    """
     return 'https://{}/api/2.0/jobs/runs/get'.format(host)
 
 
 class DatabricksHookTest(unittest.TestCase):
-
+    """
+    Tests for DatabricksHook.
+    """
     @db.provide_session
     def setUp(self, session=None):
         conn = session.query(Connection) \
@@ -85,6 +96,19 @@ class DatabricksHookTest(unittest.TestCase):
     def test_parse_host_with_invalid_host(self):
         host = self.hook._parse_host(INVALID_HOST)
         self.assertEquals(host, HOST)
+
+    @mock.patch('airflow.contrib.hooks.databricks_hook.logging')
+    @mock.patch('airflow.contrib.hooks.databricks_hook.requests')
+    def test_do_api_call_with_error_retry(self, mock_requests, mock_logging):
+        for exception in [ConnectionError, Timeout]:
+            mock_requests.reset_mock()
+            mock_logging.reset_mock()
+            mock_requests.post.side_effect = exception()
+
+            with self.assertRaises(AirflowException):
+                self.hook._do_api_call(SUBMIT_RUN_ENDPOINT, {})
+
+            self.assertEquals(len(mock_logging.error.mock_calls), self.hook.retry_limit)
 
     @mock.patch('airflow.contrib.hooks.databricks_hook.requests')
     def test_submit_run(self, mock_requests):
