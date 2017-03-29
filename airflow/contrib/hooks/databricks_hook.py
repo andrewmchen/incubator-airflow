@@ -62,6 +62,13 @@ class DatabricksHook(BaseHook):
             return host
 
     def _do_api_call(self, endpoint_info, api_parameters):
+        """
+        Utility function to perform an API call with retries
+        :param endpoint_info: Tuple of method and endpoint
+        :type endpoint_info: (string, string)
+        :param api_parameters: Parameters for this API call.
+        :type api_parameters: string
+        """
         method, endpoint = endpoint_info
         url = 'https://{host}/{endpoint}'.format(
             host=self._parse_host(self.databricks_conn.host),
@@ -133,6 +140,9 @@ class DatabricksHook(BaseHook):
 
 
 class RunState:
+    """
+    Utility class for the run state concept of Databricks runs.
+    """
     def __init__(self, life_cycle_state, result_state, state_message):
         self.life_cycle_state = life_cycle_state
         self.result_state = result_state

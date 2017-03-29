@@ -82,6 +82,35 @@ class DatabricksSubmitRunOperator(BaseOperator):
         }
         DatabricksSubmitRunOperator(task_id='run-1', **params)
         ```
+
+        :param spark_jar_task: The main class and parameters for the jar task. The jar is specified in libraries.
+            EITHER spark_jar_task OR notebook_task should be specified
+            See https://docs.databricks.com/api/latest/jobs.html#jobssparkjartask
+        :type spark_jar_task: dict
+        :param notebook_task: The notebook path and parameters for the notebook task.
+            EITHER spark_jar_task OR notebook_task should be specified
+            See https://docs.databricks.com/api/latest/jobs.html#jobsnotebooktask
+        :type notebook_task: dict
+        :param new_cluster: Specs for a new cluster on which this task will be run.
+            EITHER new_cluster OR existing_cluster_id should be specified
+            See https://docs.databricks.com/api/latest/jobs.html#jobsclusterspecnewcluster
+        :type new_cluster: dict
+        :param existing_cluster_id: ID for existing cluster on which to run this task.
+            EITHER new_cluster OR existing_cluster_id should be specified
+        :type existing_cluster_id: string
+        :param libraries: Libraries which this run will use.
+            See https://docs.databricks.com/api/latest/libraries.html#managedlibrarieslibrary
+        :type libraries: list of dicts
+        :param run_name: The run name used for this task. By default this will be set to the task_id.
+        :type run_name: string
+        :param timeout_seconds: The timeout for this run. By default a value of 0 is used which
+            means to have no timeout.
+        :type timeout_seconds: int32
+        :param extra_api_parameters: Extra parameters which will be merged with parameters listed
+            above. This may be used if additional features are added to the submit run endpoint.
+        :type extra_api_parameters: dict
+        :param databricks_conn_id: Name of the connection to use.
+        :type extra_api_parameters: string
         """
         super(DatabricksSubmitRunOperator, self).__init__(**kwargs)
         self.spark_jar_task = spark_jar_task
@@ -96,10 +125,16 @@ class DatabricksSubmitRunOperator(BaseOperator):
         self._validate_parameters()
 
     def _validate_parameters(self):
+        """
+        Validates the parameters provided to this operator.
+        """
         self._validate_oneof(self.spark_jar_task, self.notebook_task)
         self._validate_oneof(self.new_cluster, self.existing_cluster_id)
 
     def _validate_oneof(self, param_a, param_b):
+        """
+        Ensures either param_a XOR param_b is set.
+        """
         if param_a is not None and param_b is None:
             pass
         elif param_a is None and param_b is not None:
