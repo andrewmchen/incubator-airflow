@@ -105,7 +105,8 @@ class DatabricksSubmitRunOperator(BaseOperator):
         elif param_a is None and param_b is not None:
             pass
         else:
-            raise AirflowException
+            raise AirflowException(('It is an error to provide both {0} and {1}. ' +
+                'Please select only one').format(param_a, param_b))
 
     def _log_run_page_url(self, url):
         logging.info('View run status, Spark UI, and logs at {}.'.format(url))
