@@ -29,6 +29,72 @@ class DatabricksSubmitRunOperator(BaseOperator):
     Submits an ephemeral run to Databricks.
 
     https://docs.databricks.com/api/latest/jobs.html#runs-submit
+
+    Note that the named
+    parameters to this operator match the parameters exposed by
+    the Databricks ``api/2.0/jobs/runs/submit`` endpoint.
+
+    As a result, one way to instantiate a ``DatabricksSubmitRunOperator``
+    is to pass the same JSON object used to call ``api/2.0/jobs/runs/submit``
+    into the ``DatabricksSubmitRunOperator``. For example: ::
+
+        params = {
+          "new_cluster": {
+            "spark_version": "2.0.x-scala2.10",
+            "node_type_id": "r3.xlarge",
+            "aws_attributes": {
+              "availability": "ON_DEMAND"
+            },
+            "num_workers": 2
+          },
+          "libraries": [
+            {
+              "jar": "dbfs:/test.jar"
+            },
+            {
+              "maven": {
+                "coordinates": "org.jsoup:jsoup:1.7.2"
+              }
+            }
+          ],
+          "spark_jar_task": {
+            "main_class_name": "com.databricks.ComputeModels"
+          }
+        }
+        DatabricksSubmitRunOperator(task_id='spark_jar_run', **params)
+
+    :param spark_jar_task: The main class and parameters for the JAR task. Note that
+        the actual JAR is specified in the ``libraries``.
+        *EITHER* ``spark_jar_task`` *OR* ``notebook_task`` should be specified.
+        https://docs.databricks.com/api/latest/jobs.html#jobssparkjartask
+    :type spark_jar_task: dict
+    :param notebook_task: The notebook path and parameters for the notebook task.
+        *EITHER* ``spark_jar_task`` *OR* ``notebook_task`` should be specified.
+        https://docs.databricks.com/api/latest/jobs.html#jobsnotebooktask
+    :type notebook_task: dict
+    :param new_cluster: Specs for a new cluster on which this task will be run.
+        *EITHER* ``new_cluster`` *OR* ``existing_cluster_id`` should be specified.
+        https://docs.databricks.com/api/latest/jobs.html#jobsclusterspecnewcluster
+    :type new_cluster: dict
+    :param existing_cluster_id: ID for existing cluster on which to run this task.
+        *EITHER* ``new_cluster`` *OR* ``existing_cluster_id`` should be specified.
+    :type existing_cluster_id: string
+    :param libraries: Libraries which this run will use.
+        https://docs.databricks.com/api/latest/libraries.html#managedlibrarieslibrary
+    :type libraries: list of dicts
+    :param run_name: The run name used for this task.
+        By default this will be set to the ``task_id``.
+    :type run_name: string
+    :param timeout_seconds: The timeout for this run. By default a value of 0 is used which
+        means to have no timeout.
+    :type timeout_seconds: int32
+    :param extra_api_parameters: Extra parameters which will be merged with parameters listed
+        above. This may be used if additional features are added to the ``api/2.0/jobs/runs/submit``
+        endpoint.
+    :type extra_api_parameters: dict
+    :param databricks_conn_id: The name of the connection to use.
+        By default and in the common case this will be ``databricks_default``.
+    :type databricks_conn_id: string
     """
     ui_color = '#1CB1C2'
     ui_fgcolor = '#fff'
@@ -46,71 +112,7 @@ class DatabricksSubmitRunOperator(BaseOperator):
             databricks_conn_id='databricks_default',
             **kwargs):
         """
-        Creates a new ``DatabricksSubmitRunOperator``. Note that the named
-        parameters to this operator match the parameters exposed by
-        the Databricks ``api/2.0/jobs/runs/submit`` endpoint.
-
-        As a result, one way to instantiate a ``DatabricksSubmitRunOperator``
-        is to pass the same JSON object used to call ``api/2.0/jobs/runs/submit``
-        into the ``DatabricksSubmitRunOperator``. For example: ::
-
-            params = {
-              "new_cluster": {
-                "spark_version": "2.0.x-scala2.10",
-                "node_type_id": "r3.xlarge",
-                "aws_attributes": {
-                  "availability": "ON_DEMAND"
-                },
-                "num_workers": 2
-              },
-              "libraries": [
-                {
-                  "jar": "dbfs:/test.jar"
-                },
-                {
-                  "maven": {
-                    "coordinates": "org.jsoup:jsoup:1.7.2"
-                  }
-                }
-              ],
-              "spark_jar_task": {
-                "main_class_name": "com.databricks.ComputeModels"
-              }
-            }
-            DatabricksSubmitRunOperator(task_id='spark_jar_run', **params)
-
-        :param spark_jar_task: The main class and parameters for the JAR task. Note that
-            the actual JAR is specified in the ``libraries``.
-            *EITHER* ``spark_jar_task`` *OR* ``notebook_task`` should be specified.
-            https://docs.databricks.com/api/latest/jobs.html#jobssparkjartask
-        :type spark_jar_task: dict
-        :param notebook_task: The notebook path and parameters for the notebook task.
-            *EITHER* ``spark_jar_task`` *OR* ``notebook_task`` should be specified.
-            https://docs.databricks.com/api/latest/jobs.html#jobsnotebooktask
-        :type notebook_task: dict
-        :param new_cluster: Specs for a new cluster on which this task will be run.
-            *EITHER* ``new_cluster`` *OR* ``existing_cluster_id`` should be specified.
-            https://docs.databricks.com/api/latest/jobs.html#jobsclusterspecnewcluster
-        :type new_cluster: dict
-        :param existing_cluster_id: ID for existing cluster on which to run this task.
-            *EITHER* ``new_cluster`` *OR* ``existing_cluster_id`` should be specified.
-        :type existing_cluster_id: string
-        :param libraries: Libraries which this run will use.
-            https://docs.databricks.com/api/latest/libraries.html#managedlibrarieslibrary
-        :type libraries: list of dicts
-        :param run_name: The run name used for this task.
-            By default this will be set to the ``task_id``.
-        :type run_name: string
-        :param timeout_seconds: The timeout for this run. By default a value of 0 is used which
-            means to have no timeout.
-        :type timeout_seconds: int32
-        :param extra_api_parameters: Extra parameters which will be merged with parameters listed
-            above. This may be used if additional features are added to the ``api/2.0/jobs/runs/submit``
-            endpoint.
-        :type extra_api_parameters: dict
-        :param databricks_conn_id: The name of the connection to use.
-            By default and in the common case this will be ``databricks_default``.
-        :type databricks_conn_id: string
+        Creates a new ``DatabricksSubmitRunOperator``.
         """
         super(DatabricksSubmitRunOperator, self).__init__(**kwargs)
         self.spark_jar_task = spark_jar_task

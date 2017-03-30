@@ -40,7 +40,7 @@ class DatabricksHook(BaseHook):
     def __init__(
             self,
             databricks_conn_id='databricks_default',
-            timeout_seconds=60,
+            timeout_seconds=180,
             retry_limit=3):
         self.databricks_conn_id = databricks_conn_id
         self.databricks_conn = self.get_connection(databricks_conn_id)
@@ -93,6 +93,7 @@ class DatabricksHook(BaseHook):
                 if response.status_code == 200:
                     return response.json()
                 else:
+                    print response.status_code
                     # In this case, the user probably made a mistake.
                     # Don't retry.
                     raise AirflowException(response.content)
@@ -136,7 +137,11 @@ class DatabricksHook(BaseHook):
     def get_run_state(self, run_id):
         api_params = {'run_id': run_id}
         response = self._do_api_call(GET_RUN_ENDPOINT, api_params)
-        return RunState.from_get_run_response(response)
+        life_cycle_state = response['state']['life_cycle_state']
+        # result_state may not be in the state if not terminal
+        result_state = response['state'].get('result_state', None)
+        state_message = response['state']['state_message']
+        return RunState(life_cycle_state, result_state, state_message)
 
 
 class RunState:
@@ -147,15 +152,6 @@ class RunState:
         self.life_cycle_state = life_cycle_state
         self.result_state = result_state
         self.state_message = state_message
-
-    @classmethod
-    def from_get_run_response(cls, response):
-        life_cycle_state = response['state']['life_cycle_state']
-        # result_state may not be in the state if not terminal
-        result_state = response['state'].get('result_state', None)
-        state_message = response['state']['state_message']
-
-        return cls(life_cycle_state, result_state, state_message)
 
     @property
     def is_terminal(self):

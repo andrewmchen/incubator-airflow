@@ -15,7 +15,7 @@ AWS: Amazon Webservices
 
 Databricks
 --------------------------
-`Databricks <https://databricks.com/>`_ officially supports an Airflow operator which enables
+`Databricks <https://databricks.com/>`_ has contributed an Airflow operator which enables
 submitting runs to the Databricks platform. Internally the operator talks to the
 ``api/2.0/jobs/runs/submit`` `endpoint <https://docs.databricks.com/api/latest/jobs.html#runs-submit>`_.
 
@@ -23,8 +23,6 @@ DatabricksSubmitRunOperator
 ''''''''''''''''''''''''''''
 
 .. autoclass:: airflow.contrib.operators.databricks_operator.DatabricksSubmitRunOperator
-    :members:
-        __init__
 
 .. _GCP:
 

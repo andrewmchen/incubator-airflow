@@ -23,6 +23,14 @@ from airflow.utils import db
 
 from requests.exceptions import ConnectionError, Timeout
 
+try:
+    from unittest import mock
+except ImportError:
+    try:
+        import mock
+    except ImportError:
+        mock = None
+
 TASK_ID = 'databricks-operator'
 DEFAULT_CONN_ID = 'databricks_default'
 NOTEBOOK_TASK = {
@@ -49,14 +57,7 @@ GET_RUN_RESPONSE = {
         'state_message': STATE_MESSAGE
     }
 }
-
-try:
-    from unittest import mock
-except ImportError:
-    try:
-        import mock
-    except ImportError:
-        mock = None
+RESULT_STATE = None
 
 
 def submit_run_endpoint(host):
@@ -113,6 +114,8 @@ class DatabricksHookTest(unittest.TestCase):
     @mock.patch('airflow.contrib.hooks.databricks_hook.requests')
     def test_submit_run(self, mock_requests):
         mock_requests.post.return_value.json.return_value = {'run_id': '1'}
+        status_code_mock = mock.PropertyMock(return_value=200)
+        type(mock_requests.post.return_value).status_code = status_code_mock
 
         run_id = self.hook.submit_run(
             notebook_task=NOTEBOOK_TASK,
@@ -135,6 +138,8 @@ class DatabricksHookTest(unittest.TestCase):
     @mock.patch('airflow.contrib.hooks.databricks_hook.requests')
     def test_get_run_page_url(self, mock_requests):
         mock_requests.get.return_value.json.return_value = GET_RUN_RESPONSE
+        status_code_mock = mock.PropertyMock(return_value=200)
+        type(mock_requests.get.return_value).status_code = status_code_mock
 
         run_page_url = self.hook.get_run_page_url(RUN_ID)
 
@@ -150,10 +155,15 @@ class DatabricksHookTest(unittest.TestCase):
     @mock.patch('airflow.contrib.hooks.databricks_hook.requests')
     def test_get_run_state(self, mock_requests):
         mock_requests.get.return_value.json.return_value = GET_RUN_RESPONSE
+        status_code_mock = mock.PropertyMock(return_value=200)
+        type(mock_requests.get.return_value).status_code = status_code_mock
 
         run_state = self.hook.get_run_state(RUN_ID)
 
-        self.assertEquals(run_state, RunState.from_get_run_response(GET_RUN_RESPONSE))
+        self.assertEquals(run_state, RunState(
+            LIFE_CYCLE_STATE,
+            RESULT_STATE,
+            STATE_MESSAGE))
         mock_requests.get.assert_called_once_with(
             get_run_endpoint(HOST),
             json={'run_id': RUN_ID},
@@ -164,12 +174,6 @@ class DatabricksHookTest(unittest.TestCase):
 
 
 class RunStateTest(unittest.TestCase):
-    def test_from_get_run_response(self):
-        run_state = RunState.from_get_run_response(GET_RUN_RESPONSE)
-        self.assertEquals(run_state.state_message, STATE_MESSAGE)
-        self.assertEquals(run_state.life_cycle_state, LIFE_CYCLE_STATE)
-        self.assertEquals(run_state.result_state, None)
-
     def test_is_terminal(self):
         terminal_states = ['TERMINATED', 'SKIPPED', 'INTERNAL_ERROR']
         for state in terminal_states:

@@ -19,6 +19,14 @@ from airflow.contrib.hooks.databricks_hook import RunState
 from airflow.contrib.operators.databricks_operator import DatabricksSubmitRunOperator
 from airflow.exceptions import AirflowException
 
+try:
+    from unittest import mock
+except ImportError:
+    try:
+        import mock
+    except ImportError:
+        mock = None
+
 TASK_ID = 'databricks-operator'
 DEFAULT_CONN_ID = 'databricks_default'
 NOTEBOOK_TASK = {
@@ -35,14 +43,6 @@ NEW_CLUSTER = {
 EXISTING_CLUSTER_ID = 'existing-cluster-id'
 RUN_NAME = 'run-name'
 RUN_ID = 1
-
-try:
-    from unittest import mock
-except ImportError:
-    try:
-        import mock
-    except ImportError:
-        mock = None
 
 
 class DatabricksSubmitRunOperatorTest(unittest.TestCase):
