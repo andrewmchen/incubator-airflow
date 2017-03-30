@@ -93,7 +93,6 @@ class DatabricksHook(BaseHook):
                 if response.status_code == 200:
                     return response.json()
                 else:
-                    print response.status_code
                     # In this case, the user probably made a mistake.
                     # Don't retry.
                     raise AirflowException(response.content)
