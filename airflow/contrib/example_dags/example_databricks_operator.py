@@ -31,7 +31,7 @@ dag = DAG(
     schedule_interval='@daily')
 
 NEW_CLUSTER_SPEC = {
-    'spark_version': '2.0.x-scala2.10',
+    'spark_version': '2.1.0-db3-scala2.11',
     'node_type_id': 'r3.xlarge',
     'aws_attributes': {
         'availability': 'ON_DEMAND'
